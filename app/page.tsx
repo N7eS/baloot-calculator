@@ -39,6 +39,13 @@ export default function BalootCalculator() {
 
   const showErr = (msg: string) => {
     setErrText(msg);
+    // تشغيل صوت الخطأ فور ظهور رسالة الخطأ
+    try {
+      const audio = new Audio('/error.mp3');
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (err) {
+      console.log(err);
+    }
     setTimeout(() => setErrText(''), 5000);
   };
 
