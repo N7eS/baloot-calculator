@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export default function BalootCalculator() {
   const [score, setScore] = useState({ us: 0, them: 0 });
-  const [lastCommand, stL] = useState('تحدث الآن، قل: كم النتيجة، أو زيد لنا');
+  const [lastCommand, setLastCommand] = useState('جاهز للاستماع، قل: كم النتيجة');
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -11,13 +11,12 @@ export default function BalootCalculator() {
       const recognition = new SpeechRecognition();
       recognition.lang = 'ar-SA';
       recognition.continuous = true;
-      recognition.interimResults = true; // عشان يلقط الكلام وهو ينقال
+      recognition.interimResults = true;
 
       recognition.onresult = (event: any) => {
         const text = event.results[event.results.length - 1][0].transcript.trim();
-        stL(`سمعت: "${text}"`);
+        setLastCommand(`سمعت: "${text}"`);
         
-        // شروط مرنة جداً للتعرف على الصوت
         if (text.includes('نتيجة') || text.includes('كم') || text.includes('البلوت')) {
           speak(`النتيجة يا أبو عبدالله، لنا ${score.us} ولهم ${score.them}`);
         } else if (text.includes('زيد لنا') || text.includes('لنا')) {
@@ -29,8 +28,6 @@ export default function BalootCalculator() {
         }
       };
 
-      recognition.onerror = (e: any) => console.log(e);
-      
       try {
         recognition.start();
       } catch (e) {
@@ -40,15 +37,27 @@ export default function BalootCalculator() {
   }, [score]);
 
   const speak = (text: string) => {
+    if (!('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel(); // إيقاف أي صوت قديم متداخل
     const msg = new SpeechSynthesisUtterance(text);
     msg.lang = 'ar-SA';
+    msg.rate = 0.95; // سرعة هادئة وواضحة
+
+    // البحث عن صوت عربي حقيقي في جهاز المستخدم لتجنب الحروف غير المفهومة
+    const voices = window.speechSynthesis.getVoices();
+    const arabicVoice = voices.find(v => v.lang === 'ar-SA' || v.lang.startsWith('ar'));
+    if (arabicVoice) {
+      msg.voice = arabicVoice;
+    }
+
     window.speechSynthesis.speak(msg);
   };
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f172a', color: '#fff', padding: '40px 20px', textAlign: 'center', fontFamily: 'system-ui, sans-serif', direction: 'rtl' }}>
       <h1 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '10px' }}>حاسبة البلوت الصوتية</h1>
-      <p style={{ fontSize: '14px', color: '#94a3b8', marginBottom: '30px' }}>الاستماع التلقائي يعمل في الخلفية</p>
+      <p style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '30px' }}>صوت عربي واضح بالكامل</p>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
         <div style={{ background: '#1e293b', padding: '20px 30px', borderRadius: '12px', border: '1px solid #334155' }}>
