@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Round {
   us: number;
@@ -16,8 +16,6 @@ export default function BalootCalculator() {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [errText, setErrText] = useState<string>('');
   const [winnerMessage, setWinnerMessage] = useState<string>('');
-
-  const finishAudio = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const savedUsScore = localStorage.getItem('baloot_usScore');
@@ -79,9 +77,12 @@ export default function BalootCalculator() {
       const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
       
-      if (finishAudio.current) {
-        finishAudio.current.currentTime = 0;
-        finishAudio.current.play().catch(() => {});
+      // تشغيل الصوت بطريقة مضمونة فور وصول النقاط 152
+      try {
+        const audio = new Audio('/finish.mp3');
+        audio.play().catch(e => console.log("Audio play blocked:", e));
+      } catch (err) {
+        console.log(err);
       }
     }
 
@@ -143,8 +144,6 @@ export default function BalootCalculator() {
       justifyContent: 'space-between'
     }}>
       
-      <audio ref={finishAudio} src="/finish.mp3" preload="auto" />
-
       <div>
         <div style={{ marginBottom: '30px' }}>
           <div style={{ fontSize: '38px', marginBottom: '8px' }}>🎴</div>
