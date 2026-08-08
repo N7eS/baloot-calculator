@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface Round {
   us: number;
@@ -17,7 +17,8 @@ export default function BalootCalculator() {
   const [errText, setErrText] = useState<string>('');
   const [winnerMessage, setWinnerMessage] = useState<string>('');
 
-  // استرجاع البيانات المحفوظة عند فتح الموقع لأول مرة
+  const finishAudio = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     const savedUsScore = localStorage.getItem('baloot_usScore');
     const savedThemScore = localStorage.getItem('baloot_themScore');
@@ -30,7 +31,6 @@ export default function BalootCalculator() {
     if (savedWinner) setWinnerMessage(savedWinner);
   }, []);
 
-  // دالة لحفظ الحالة تلقائياً في ذاكرة المتصفح
   const saveToStorage = (newUs: number, newThem: number, newRounds: Round[], winner: string) => {
     localStorage.setItem('baloot_usScore', newUs.toString());
     localStorage.setItem('baloot_themScore', newThem.toString());
@@ -46,7 +46,6 @@ export default function BalootCalculator() {
   const handleSubmit = () => {
     setErrText('');
     
-    // إذا تركت إحدى الخانات فارغة تعتبر 0 تلقائياً
     const usVal = usInput.trim() === '' ? 0 : parseInt(usInput);
     const themVal = themInput.trim() === '' ? 0 : parseInt(themInput);
 
@@ -79,6 +78,11 @@ export default function BalootCalculator() {
     if (newUsScore >= 152 || newThemScore >= 152) {
       const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
+      
+      if (finishAudio.current) {
+        finishAudio.current.currentTime = 0;
+        finishAudio.current.play().catch(() => {});
+      }
     }
 
     setUsScore(newUsScore);
@@ -89,7 +93,6 @@ export default function BalootCalculator() {
     setUsInput('');
     setThemInput('');
 
-    // حفظ البيانات تلقائياً
     saveToStorage(newUsScore, newThemScore, updatedRounds, newWinner);
   };
 
@@ -108,7 +111,6 @@ export default function BalootCalculator() {
     setWinnerMessage('');
     setErrText('');
 
-    // حفظ التحديث بعد التراجع
     saveToStorage(newUsScore, newThemScore, updatedRounds, '');
   };
 
@@ -121,7 +123,6 @@ export default function BalootCalculator() {
     setErrText('');
     setWinnerMessage('');
 
-    // مسح الذاكرة عند بدء لعبة جديدة
     localStorage.removeItem('baloot_usScore');
     localStorage.removeItem('baloot_themScore');
     localStorage.removeItem('baloot_rounds');
@@ -142,32 +143,29 @@ export default function BalootCalculator() {
       justifyContent: 'space-between'
     }}>
       
+      <audio ref={finishAudio} src="/finish.mp3" preload="auto" />
+
       <div>
-        {/* الترويسة الرسمية */}
         <div style={{ marginBottom: '30px' }}>
           <div style={{ fontSize: '38px', marginBottom: '8px' }}>🎴</div>
           <h1 style={{ fontSize: '30px', fontWeight: '800', color: '#C9A45C', letterSpacing: '0.5px' }}>حاسبة البلوت الرسمية</h1>
           <p style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '400', marginTop: '6px' }}>نظام دقيق ومحترف لإدارة القيود</p>
         </div>
 
-        {/* تنبيهات الخطأ */}
         {errText && (
           <div style={{ background: 'rgba(220, 38, 38, 0.15)', border: '1px solid #ef4444', color: '#fca5a5', padding: '14px 20px', borderRadius: '10px', fontWeight: 'bold', maxWidth: '500px', margin: '0 auto 20px', fontSize: '14px' }}>
             ⚠️ {errText}
           </div>
         )}
 
-        {/* إعلان الفوز */}
         {winnerMessage && (
           <div style={{ background: 'rgba(46, 74, 125, 0.3)', border: '1px solid #2E4A7D', color: '#C9A45C', padding: '16px', borderRadius: '12px', fontWeight: '800', fontSize: '18px', maxWidth: '500px', margin: '0 auto 20px' }}>
             {winnerMessage}
           </div>
         )}
 
-        {/* لوحة النتائج الفخمة */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px', maxWidth: '650px', margin: '0 auto 25px' }}>
           
-          {/* فريق لنا (ذهبي) */}
           <div style={{ background: '#C9A45C', padding: '25px 20px', borderRadius: '16px', border: '1px solid #b8934b', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#1C1F26', fontSize: '18px', marginBottom: '10px', fontWeight: '800' }}>لنا</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#1C1F26' }}>{usScore}</div>
@@ -180,7 +178,6 @@ export default function BalootCalculator() {
             />
           </div>
 
-          {/* فريق لهم */}
           <div style={{ background: '#2A2E35', padding: '25px 20px', borderRadius: '16px', border: '1px solid #3A3F48', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#2E4A7D', fontSize: '18px', marginBottom: '10px', fontWeight: '700' }}>لهم</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#E0E0E0' }}>{themScore}</div>
@@ -195,7 +192,6 @@ export default function BalootCalculator() {
 
         </div>
 
-        {/* أزرار التحكم الرئيسية */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', maxWidth: '480px', margin: '0 auto 20px' }}>
           <button onClick={handleSubmit} style={{ flex: 2, padding: '14px', background: '#2E4A7D', color: '#FFFFFF', border: 'none', borderRadius: '10px', fontWeight: '700', fontSize: '16px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(46,74,125,0.4)' }}>
             إضافة القيد
@@ -209,7 +205,6 @@ export default function BalootCalculator() {
           لعبة جديدة
         </button>
 
-        {/* سجل القيود والجولات السابقة */}
         {rounds.length > 0 && (
           <div style={{ maxWidth: '480px', margin: '0 auto', background: '#2A2E35', borderRadius: '14px', border: '1px solid #3A3F48', padding: '15px', textAlign: 'right' }}>
             <h4 style={{ fontSize: '15px', color: '#C9A45C', marginBottom: '12px', textAlign: 'center', fontWeight: '700' }}>سجل الجولات السابقة</h4>
@@ -232,7 +227,6 @@ export default function BalootCalculator() {
 
       </div>
 
-      {/* الفوتر مع الحقوق والتوجيه لموقعك */}
       <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8' }}>
         Made By <a href="https://na9er.net" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A45C', textDecoration: 'none', fontWeight: '700' }}>Tech idea</a>
       </footer>
