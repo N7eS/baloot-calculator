@@ -236,7 +236,14 @@ export default function BalootCalculator() {
 
       <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', textAlign: 'center' }}>
         <span style={{ color: '#94a3b8' }}>Made By </span>
-        <span style={{ color: '#C9A45C', fontWeight: '700' }}>Tech idea</span>
+        <a 
+          href="https://na9er.net" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          style={{ color: '#C9A45C', fontWeight: '700', textDecoration: 'none' }}
+        >
+          Tech idea
+        </a>
       </footer>
 
     </div>
