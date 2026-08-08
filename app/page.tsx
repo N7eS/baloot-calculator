@@ -234,8 +234,9 @@ export default function BalootCalculator() {
 
       </div>
 
-      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>
-        <span>Made By Tech idea</span>
+      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', textAlign: 'center' }}>
+        <span style={{ color: '#94a3b8' }}>Made By </span>
+        <span style={{ color: '#C9A45C', fontWeight: '700' }}>Tech idea</span>
       </footer>
 
     </div>
