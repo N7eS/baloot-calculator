@@ -130,16 +130,16 @@ export default function BalootCalculator() {
         {/* لوحة النتائج الفخمة */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px', maxWidth: '650px', margin: '0 auto 30px' }}>
           
-          {/* فريق لنا */}
-          <div style={{ background: '#2A2E35', padding: '25px 20px', borderRadius: '16px', border: '1px solid #3A3F48', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
-            <h3 style={{ color: '#2E4A7D', fontSize: '18px', marginBottom: '10px', fontWeight: '700' }}>لنا</h3>
-            <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#E0E0E0' }}>{usScore}</div>
+          {/* فريق لنا (مميز باللون الذهبي الهادئ) */}
+          <div style={{ background: '#C9A45C', padding: '25px 20px', borderRadius: '16px', border: '1px solid #b8934b', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
+            <h3 style={{ color: '#1C1F26', fontSize: '18px', marginBottom: '10px', fontWeight: '800' }}>لنا</h3>
+            <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#1C1F26' }}>{usScore}</div>
             <input 
               type="number" 
               placeholder="نقاط لنا" 
               value={usInput}
               onChange={(e) => setUsInput(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #3A3F48', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #b8934b', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none' }}
             />
           </div>
 
