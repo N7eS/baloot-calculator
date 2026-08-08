@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface Round {
   us: number;
@@ -14,9 +14,29 @@ export default function BalootCalculator() {
   const [themInput, setThemInput] = useState<string>('');
 
   const [rounds, setRounds] = useState<Round[]>([]);
-
   const [errText, setErrText] = useState<string>('');
   const [winnerMessage, setWinnerMessage] = useState<string>('');
+
+  // استرجاع البيانات المحفوظة عند فتح الموقع لأول مرة
+  useEffect(() => {
+    const savedUsScore = localStorage.getItem('baloot_usScore');
+    const savedThemScore = localStorage.getItem('baloot_themScore');
+    const savedRounds = localStorage.getItem('baloot_rounds');
+    const savedWinner = localStorage.getItem('baloot_winner');
+
+    if (savedUsScore) setUsScore(parseInt(savedUsScore));
+    if (savedThemScore) setThemScore(parseInt(savedThemScore));
+    if (savedRounds) setRounds(JSON.parse(savedRounds));
+    if (savedWinner) setWinnerMessage(savedWinner);
+  }, []);
+
+  // دالة لحفظ الحالة تلقائياً في ذاكرة المتصفح
+  const saveToStorage = (newUs: number, newThem: number, newRounds: Round[], winner: string) => {
+    localStorage.setItem('baloot_usScore', newUs.toString());
+    localStorage.setItem('baloot_themScore', newThem.toString());
+    localStorage.setItem('baloot_rounds', JSON.stringify(newRounds));
+    localStorage.setItem('baloot_winner', winner);
+  };
 
   const showErr = (msg: string) => {
     setErrText(msg);
@@ -26,7 +46,7 @@ export default function BalootCalculator() {
   const handleSubmit = () => {
     setErrText('');
     
-    // إذا كانت الخانة فاضية تعتبر 0 تلقائياً
+    // إذا تركت إحدى الخانات فارغة تعتبر 0 تلقائياً
     const usVal = usInput.trim() === '' ? 0 : parseInt(usInput);
     const themVal = themInput.trim() === '' ? 0 : parseInt(themInput);
 
@@ -49,42 +69,47 @@ export default function BalootCalculator() {
       return;
     }
 
-    // إضافة الجولة الجديدة في بداية السجل (الأحدث فوق والأقدم تحت)
     const newRound: Round = { us: usVal, them: themVal };
-    setRounds(prev => [newRound, ...prev]);
+    const updatedRounds = [newRound, ...rounds];
 
     const newUsScore = usScore + usVal;
     const newThemScore = themScore + themVal;
 
+    let newWinner = '';
+    if (newUsScore >= 152 || newThemScore >= 152) {
+      const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
+      newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
+    }
+
     setUsScore(newUsScore);
     setThemScore(newThemScore);
+    setRounds(updatedRounds);
+    setWinnerMessage(newWinner);
 
     setUsInput('');
     setThemInput('');
 
-    checkWin(newUsScore, newThemScore);
+    // حفظ البيانات تلقائياً
+    saveToStorage(newUsScore, newThemScore, updatedRounds, newWinner);
   };
 
   const handleUndo = () => {
     if (rounds.length === 0) return;
 
-    // إزالة أحدث جولة من السجل
     const lastRound = rounds[0];
     const updatedRounds = rounds.slice(1);
 
-    setUsScore(prev => prev - lastRound.us);
-    setThemScore(prev => prev - lastRound.them);
+    const newUsScore = usScore - lastRound.us;
+    const newThemScore = themScore - lastRound.them;
+
+    setUsScore(newUsScore);
+    setThemScore(newThemScore);
     setRounds(updatedRounds);
-
-    setErrText('');
     setWinnerMessage('');
-  };
+    setErrText('');
 
-  const checkWin = (us: number, them: number) => {
-    if (us >= 152 || them >= 152) {
-      const teamName = us > them ? 'لنا' : 'لهم';
-      setWinnerMessage(`🎉 مبروك فوز فريق (${teamName}) بالجيّم!`);
-    }
+    // حفظ التحديث بعد التراجع
+    saveToStorage(newUsScore, newThemScore, updatedRounds, '');
   };
 
   const resetGame = () => {
@@ -95,6 +120,12 @@ export default function BalootCalculator() {
     setRounds([]);
     setErrText('');
     setWinnerMessage('');
+
+    // مسح الذاكرة عند بدء لعبة جديدة
+    localStorage.removeItem('baloot_usScore');
+    localStorage.removeItem('baloot_themScore');
+    localStorage.removeItem('baloot_rounds');
+    localStorage.removeItem('baloot_winner');
   };
 
   return (
