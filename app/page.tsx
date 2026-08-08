@@ -39,7 +39,6 @@ export default function BalootCalculator() {
 
   const showErr = (msg: string) => {
     setErrText(msg);
-    // تشغيل صوت الخطأ فور ظهور رسالة الخطأ
     try {
       const audio = new Audio('/error.mp3');
       audio.play().catch(e => console.log("Audio play blocked:", e));
@@ -235,10 +234,8 @@ export default function BalootCalculator() {
 
       </div>
 
-      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-        <span>Made By</span>
-        <a href="https://na9er.net" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A45C', textDecoration: 'none', fontWeight: '700' }}>Tech idea</a>
-        <Image src="/logo.png" alt="Logo" width={16} height={16} style={{ objectFit: 'contain', verticalAlign: 'middle' }} />
+      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>
+        <span>Made By Tech idea</span>
       </footer>
 
     </div>
