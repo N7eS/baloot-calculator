@@ -1,77 +1,93 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useRef } from 'react';
 
 export default function BalootCalculator() {
-  const [score, setScore] = useState({ us: 0, them: 0 });
-  const [lastCommand, setLastCommand] = useState('جاهز للاستماع، قل: كم النتيجة');
+  const [usScore, setUsScore] = useState<number>(0);
+  const [themScore, setThemScore] = useState<number>(0);
+  const [usInput, setUsInput] = useState<string>('');
+  const [themInput, setThemInput] = useState<string>('');
+  
+  const finishAudio = useRef<HTMLAudioElement | null>(null);
+  const specialAudio = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'ar-SA';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-
-      recognition.onresult = (event: any) => {
-        const text = event.results[event.results.length - 1][0].transcript.trim();
-        setLastCommand(`سمعت: "${text}"`);
-        
-        if (text.includes('نتيجة') || text.includes('كم') || text.includes('البلوت')) {
-          speak(`النتيجة يا أبو عبدالله، لنا ${score.us} ولهم ${score.them}`);
-        } else if (text.includes('زيد لنا') || text.includes('لنا')) {
-          setScore(prev => ({ ...prev, us: prev.us + 50 }));
-          speak('تم إضافة خمسين لنا');
-        } else if (text.includes('زيد لهم') || text.includes('لهم')) {
-          setScore(prev => ({ ...prev, them: prev.them + 50 }));
-          speak('تم إضافة خمسين لهم');
-        }
-      };
-
-      try {
-        recognition.start();
-      } catch (e) {
-        console.log(e);
-      }
+  const addScore = (team: 'us' | 'them') => {
+    if (team === 'us') {
+      const val = parseInt(usInput) || 0;
+      const newScore = usScore + val;
+      setUsScore(newScore);
+      setUsInput('');
+      checkConditions(newScore, themScore);
+    } else {
+      const val = parseInt(themInput) || 0;
+      const newScore = themScore + val;
+      setThemScore(newScore);
+      setThemInput('');
+      checkConditions(usScore, newScore);
     }
-  }, [score]);
+  };
 
-  const speak = (text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    
-    window.speechSynthesis.cancel(); // إيقاف أي صوت قديم متداخل
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'ar-SA';
-    msg.rate = 0.95; // سرعة هادئة وواضحة
-
-    // البحث عن صوت عربي حقيقي في جهاز المستخدم لتجنب الحروف غير المفهومة
-    const voices = window.speechSynthesis.getVoices();
-    const arabicVoice = voices.find(v => v.lang === 'ar-SA' || v.lang.startsWith('ar'));
-    if (arabicVoice) {
-      msg.voice = arabicVoice;
+  const undoScore = (team: 'us' | 'them') => {
+    if (team === 'us') {
+      const val = parseInt(usInput) || 0;
+      setUsScore(Math.max(0, usScore - val));
+      setUsInput('');
+    } else {
+      const val = parseInt(themInput) || 0;
+      setThemScore(Math.max(0, themScore - val));
+      setThemInput('');
     }
+  };
 
-    window.speechSynthesis.speak(msg);
+  const checkConditions = (us: number, them: number) => {
+    if ((us >= 50 && them === 0) || (them >= 50 && us === 0)) {
+      if (specialAudio.current) specialAudio.current.play().catch(() => {});
+    }
+    if (us >= 152 || them >= 152) {
+      if (finishAudio.current) finishAudio.current.play().catch(() => {});
+    }
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f172a', color: '#fff', padding: '40px 20px', textAlign: 'center', fontFamily: 'system-ui, sans-serif', direction: 'rtl' }}>
-      <h1 style={{ fontSize: '26px', fontWeight: 'bold', marginBottom: '10px' }}>حاسبة البلوت الصوتية</h1>
-      <p style={{ fontSize: '14px', color: '#38bdf8', marginBottom: '30px' }}>صوت عربي واضح بالكامل</p>
+    <div style={{ minHeight: '100vh', background: '#0f172a', color: '#fff', padding: '30px 15px', textAlign: 'center', fontFamily: 'system-ui, sans-serif', direction: 'rtl' }}>
+      <audio ref={finishAudio} src="/finish.mp3" preload="auto" />
+      <audio ref={specialAudio} src="/special.mp3" preload="auto" />
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ background: '#1e293b', padding: '20px 30px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <h3 style={{ color: '#38bdf8', fontSize: '18px', marginBottom: '8px' }}>لنا</h3>
-          <span style={{ fontSize: '36px', fontWeight: 'bold' }}>{score.us}</span>
-        </div>
-        <div style={{ background: '#1e293b', padding: '20px 30px', borderRadius: '12px', border: '1px solid #334155' }}>
-          <h3 style={{ color: '#f43f5e', fontSize: '18px', marginBottom: '8px' }}>لهم</h3>
-          <span style={{ fontSize: '36px', fontWeight: 'bold' }}>{score.them}</span>
-        </div>
-      </div>
+      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>حاسبة البلوت</h1>
 
-      <div style={{ background: '#1e293b', padding: '15px', borderRadius: '8px', maxWidth: '400px', margin: '0 auto', border: '1px solid #475569' }}>
-        <p style={{ fontSize: '14px', color: '#cbd5e1' }}>{lastCommand}</p>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px', maxWidth: '600px', margin: '0 auto 30px' }}>
+        {/* فريق لنا */}
+        <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid #334155', flex: 1 }}>
+          <h3 style={{ color: '#38bdf8', fontSize: '18px', marginBottom: '10px' }}>لنا</h3>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '15px' }}>{usScore}</div>
+          <input 
+            type="number" 
+            placeholder="النقاط" 
+            value={usInput}
+            onChange={(e) => setUsInput(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #475569', background: '#0f172a', color: '#fff', marginBottom: '10px', textAlign: 'center' }}
+          />
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <button onClick={() => addScore('us')} style={{ flex: 1, padding: '8px', background: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>إضافة</button>
+            <button onClick={() => undoScore('us')} style={{ flex: 1, padding: '8px', background: '#f43f5e', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>تراجع</button>
+          </div>
+        </div>
+
+        {/* فريق لهم */}
+        <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid #334155', flex: 1 }}>
+          <h3 style={{ color: '#f43f5e', fontSize: '18px', marginBottom: '10px' }}>لهم</h3>
+          <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '15px' }}>{themScore}</div>
+          <input 
+            type="number" 
+            placeholder="النقاط" 
+            value={themInput}
+            onChange={(e) => setThemInput(e.target.value)}
+            style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #475569', background: '#0f172a', color: '#fff', marginBottom: '10px', textAlign: 'center' }}
+          />
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <button onClick={() => addScore('them')} style={{ flex: 1, padding: '8px', background: '#38bdf8', color: '#0f172a', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>إضافة</button>
+            <button onClick={() => undoScore('them')} style={{ flex: 1, padding: '8px', background: '#f43f5e', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>تراجع</button>
+          </div>
+        </div>
       </div>
     </div>
   );
