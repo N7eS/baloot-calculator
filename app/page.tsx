@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Round {
   us: number;
@@ -77,7 +78,6 @@ export default function BalootCalculator() {
       const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
       
-      // تشغيل الصوت بطريقة مضمونة فور وصول النقاط 152
       try {
         const audio = new Audio('/finish.mp3');
         audio.play().catch(e => console.log("Audio play blocked:", e));
@@ -145,9 +145,11 @@ export default function BalootCalculator() {
     }}>
       
       <div>
-        <div style={{ marginBottom: '30px' }}>
-          <div style={{ fontSize: '38px', marginBottom: '8px' }}>🎴</div>
-          <h1 style={{ fontSize: '30px', fontWeight: '800', color: '#C9A45C', letterSpacing: '0.5px' }}>حاسبة البلوت الرسمية</h1>
+        <div style={{ marginBottom: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ marginBottom: '10px' }}>
+            <Image src="/logo.png" alt="Logo" width={48} height={48} style={{ objectFit: 'contain' }} />
+          </div>
+          <h1 style={{ fontSize: '30px', fontWeight: '800', color: '#C9A45C', letterSpacing: '0.5px' }}>حاسبة البلوت</h1>
           <p style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '400', marginTop: '6px' }}>نظام دقيق ومحترف لإدارة القيود</p>
         </div>
 
@@ -226,8 +228,10 @@ export default function BalootCalculator() {
 
       </div>
 
-      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8' }}>
-        Made By <a href="https://na9er.net" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A45C', textDecoration: 'none', fontWeight: '700' }}>Tech idea</a>
+      <footer style={{ marginTop: '50px', padding: '20px', borderTop: '1px solid rgba(255,255,255,0.05)', fontSize: '13px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+        <span>Made By</span>
+        <a href="https://na9er.net" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A45C', textDecoration: 'none', fontWeight: '700' }}>Tech idea</a>
+        <Image src="/logo.png" alt="Logo" width={16} height={16} style={{ objectFit: 'contain', verticalAlign: 'middle' }} />
       </footer>
 
     </div>
