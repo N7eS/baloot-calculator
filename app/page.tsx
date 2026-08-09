@@ -57,7 +57,7 @@ export default function BalootCalculator() {
     }
   };
 
-  // زر السؤال الصوتي (يبقى نطق بالمتصفح إذا احتجته)
+  // النطق الصوتي يعمل فقط عند الضغط على زر "جم القيد؟"
   const speakResult = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -70,7 +70,7 @@ export default function BalootCalculator() {
 
   const showErr = (msg: string) => {
     setErrText(msg);
-    playErrorSound(); // تشغيل صوت الخطأ الفعلي
+    playErrorSound(); // تشغيل ملف الصوت الخاص بالخطأ فقط
     setTimeout(() => setErrText(''), 5000);
   };
 
@@ -103,25 +103,24 @@ export default function BalootCalculator() {
     const updatedRounds = [newRound, ...rounds];
 
     const newUsScore = usScore + usVal;
-    const newThemScore = themeScore => score => themScore + themVal; // تعشيق الآراء
-    const actualThemScore = themScore + themVal;
+    const newThemScore = themScore + themVal;
 
     let newWinner = '';
-    if (newUsScore >= 152 || actualThemScore >= 152) {
-      const teamName = newUsScore > actualThemScore ? 'لنا' : 'لهم';
+    if (newUsScore >= 152 || newThemScore >= 152) {
+      const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
-      playFinishSound(); // تشغيل صوت الفوز الفعلي
+      playFinishSound(); // تشغيل ملف الصوت الخاص بالفوز فقط
     }
 
     setUsScore(newUsScore);
-    setThemScore(actualThemScore);
+    setThemScore(newThemScore);
     setRounds(updatedRounds);
     setWinnerMessage(newWinner);
 
     setUsInput('');
     setThemInput('');
 
-    saveToStorage(newUsScore, actualThemScore, updatedRounds, newWinner);
+    saveToStorage(newUsScore, newThemScore, updatedRounds, newWinner);
   };
 
   const handleUndo = () => {
