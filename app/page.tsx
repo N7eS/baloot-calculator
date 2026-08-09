@@ -37,9 +37,31 @@ export default function BalootCalculator() {
     localStorage.setItem('baloot_winner', winner);
   };
 
-  const speak = (text: string) => {
+  // تشغيل صوت الخطأ (error.mp3)
+  const playErrorSound = () => {
+    try {
+      const audio = new Audio('/error.mp3');
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // تشغيل صوت الفوز (finish.mp3)
+  const playFinishSound = () => {
+    try {
+      const audio = new Audio('/finish.mp3');
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // زر السؤال الصوتي (يبقى نطق بالمتصفح إذا احتجته)
+  const speakResult = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
+      const text = `النتيجة حالياً، لنا ${usScore} ولهم ${themScore}`;
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = 'ar-SA';
       window.speechSynthesis.speak(utterance);
@@ -48,7 +70,7 @@ export default function BalootCalculator() {
 
   const showErr = (msg: string) => {
     setErrText(msg);
-    speak(msg);
+    playErrorSound(); // تشغيل صوت الخطأ الفعلي
     setTimeout(() => setErrText(''), 5000);
   };
 
@@ -81,24 +103,25 @@ export default function BalootCalculator() {
     const updatedRounds = [newRound, ...rounds];
 
     const newUsScore = usScore + usVal;
-    const newThemScore = themScore + themVal;
+    const newThemScore = themeScore => score => themScore + themVal; // تعشيق الآراء
+    const actualThemScore = themScore + themVal;
 
     let newWinner = '';
-    if (newUsScore >= 152 || newThemScore >= 152) {
-      const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
+    if (newUsScore >= 152 || actualThemScore >= 152) {
+      const teamName = newUsScore > actualThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
-      speak(`مبروك فوز فريق ${teamName} بالجيّم`);
+      playFinishSound(); // تشغيل صوت الفوز الفعلي
     }
 
     setUsScore(newUsScore);
-    setThemScore(newThemScore);
+    setThemScore(actualThemScore);
     setRounds(updatedRounds);
     setWinnerMessage(newWinner);
 
     setUsInput('');
     setThemInput('');
 
-    saveToStorage(newUsScore, newThemScore, updatedRounds, newWinner);
+    saveToStorage(newUsScore, actualThemScore, updatedRounds, newWinner);
   };
 
   const handleUndo = () => {
@@ -169,7 +192,7 @@ export default function BalootCalculator() {
           </div>
         )}
 
-        {/* حاوية مربعات الفريقين مع السجلات الخاصة بكل فريق تحته مباشرة */}
+        {/* حاوية مربعات الفريقين مع السجلات تحتها */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px', maxWidth: '650px', margin: '0 auto 25px', alignItems: 'flex-start' }}>
           
           {/* فريق لنا */}
@@ -184,7 +207,6 @@ export default function BalootCalculator() {
               style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #b8934b', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none', marginBottom: '15px' }}
             />
             
-            {/* سجل فريق لنا تحت المربع */}
             {rounds.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto' }}>
                 {rounds.map((round, index) => (
@@ -208,7 +230,6 @@ export default function BalootCalculator() {
               style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #3A3F48', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none', marginBottom: '15px' }}
             />
 
-            {/* سجل فريق لهم تحت المربع */}
             {rounds.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto' }}>
                 {rounds.map((round, index) => (
@@ -232,7 +253,7 @@ export default function BalootCalculator() {
         </div>
 
         <div style={{ maxWidth: '480px', margin: '0 auto 15px' }}>
-          <button onClick={() => speak(`النتيجة حالياً، لنا ${usScore} ولهم ${themScore}`)} style={{ width: '100%', padding: '12px', background: '#C9A45C', color: '#1C1F26', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '15px', cursor: 'pointer' }}>
+          <button onClick={speakResult} style={{ width: '100%', padding: '12px', background: '#C9A45C', color: '#1C1F26', border: 'none', borderRadius: '10px', fontWeight: '800', fontSize: '15px', cursor: 'pointer' }}>
             🎙️ جم القيد؟
           </button>
         </div>
