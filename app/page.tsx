@@ -169,8 +169,10 @@ export default function BalootCalculator() {
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px', maxWidth: '650px', margin: '0 auto 25px' }}>
+        {/* حاوية مربعات الفريقين مع السجلات الخاصة بكل فريق تحته مباشرة */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px', maxWidth: '650px', margin: '0 auto 25px', alignItems: 'flex-start' }}>
           
+          {/* فريق لنا */}
           <div style={{ background: '#C9A45C', padding: '25px 20px', borderRadius: '16px', border: '1px solid #b8934b', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#1C1F26', fontSize: '18px', marginBottom: '10px', fontWeight: '800' }}>لنا</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#1C1F26' }}>{usScore}</div>
@@ -179,10 +181,22 @@ export default function BalootCalculator() {
               placeholder="نقاط لنا" 
               value={usInput}
               onChange={(e) => setUsInput(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #b8934b', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #b8934b', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none', marginBottom: '15px' }}
             />
+            
+            {/* سجل فريق لنا تحت المربع */}
+            {rounds.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto' }}>
+                {rounds.map((round, index) => (
+                  <div key={index} style={{ background: '#b8934b', color: '#1C1F26', padding: '10px', borderRadius: '8px', fontWeight: '900', fontSize: '18px', textAlign: 'center', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.2)' }}>
+                    {round.us}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
+          {/* فريق لهم */}
           <div style={{ background: '#2A2E35', padding: '25px 20px', borderRadius: '16px', border: '1px solid #3A3F48', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#2E4A7D', fontSize: '18px', marginBottom: '10px', fontWeight: '700' }}>لهم</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#E0E0E0' }}>{themScore}</div>
@@ -191,8 +205,19 @@ export default function BalootCalculator() {
               placeholder="نقاط لهم" 
               value={themInput}
               onChange={(e) => setThemInput(e.target.value)}
-              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #3A3F48', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none' }}
+              style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #3A3F48', background: '#1C1F26', color: '#E0E0E0', textAlign: 'center', fontSize: '16px', fontWeight: 'bold', outline: 'none', marginBottom: '15px' }}
             />
+
+            {/* سجل فريق لهم تحت المربع */}
+            {rounds.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto' }}>
+                {rounds.map((round, index) => (
+                  <div key={index} style={{ background: '#1C1F26', color: '#E0E0E0', padding: '10px', borderRadius: '8px', fontWeight: '900', fontSize: '18px', textAlign: 'center', border: '1px solid #3A3F48' }}>
+                    {round.them}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
@@ -215,26 +240,6 @@ export default function BalootCalculator() {
         <button onClick={resetGame} style={{ padding: '10px 22px', background: 'transparent', color: '#C9A45C', border: '1px solid #3A3F48', borderRadius: '8px', fontWeight: '600', fontSize: '14px', cursor: 'pointer', marginBottom: '30px' }}>
           لعبة جديدة
         </button>
-
-        {rounds.length > 0 && (
-          <div style={{ maxWidth: '480px', margin: '0 auto', background: '#2A2E35', borderRadius: '14px', border: '1px solid #3A3F48', padding: '15px', textAlign: 'right' }}>
-            <h4 style={{ fontSize: '15px', color: '#C9A45C', marginBottom: '12px', textAlign: 'center', fontWeight: '700' }}>سجل الجولات السابقة</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '200px', overflowY: 'auto' }}>
-              {rounds.map((round, index) => {
-                const roundNum = rounds.length - index;
-                return (
-                  <div key={index} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 14px', background: '#1C1F26', borderRadius: '8px', border: '1px solid #3A3F48', fontSize: '14px' }}>
-                    <span style={{ color: '#94a3b8', fontWeight: 'bold' }}>جولة {roundNum}</span>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                      <span style={{ color: '#C9A45C' }}>لنا: <b>{round.us}</b></span>
-                      <span style={{ color: '#E0E0E0' }}>لهم: <b>{round.them}</b></span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
 
       </div>
 
