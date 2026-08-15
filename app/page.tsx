@@ -15,7 +15,6 @@ export default function BalootCalculator() {
   const [themInput, setThemInput] = useState<string>('');
 
   const [rounds, setRounds] = useState<Round[]>([]);
-  const [errText, setErrText] = useState<string>('');
   const [winnerMessage, setWinnerMessage] = useState<string>('');
 
   useEffect(() => {
@@ -37,15 +36,6 @@ export default function BalootCalculator() {
     localStorage.setItem('baloot_winner', winner);
   };
 
-  const playErrorSound = () => {
-    try {
-      const audio = new Audio('/error.mp3');
-      audio.play().catch(e => console.log("Audio play blocked:", e));
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   const playFinishSound = () => {
     try {
       const audio = new Audio('/finish.mp3');
@@ -65,49 +55,12 @@ export default function BalootCalculator() {
     }
   };
 
-  const showErr = (msg: string) => {
-    setErrText(msg);
-    playErrorSound();
-    setTimeout(() => setErrText(''), 5000);
-  };
-
   const handleSubmit = () => {
-    setErrText('');
-    
     const usVal = usInput.trim() === '' ? 0 : parseInt(usInput);
     const themVal = themInput.trim() === '' ? 0 : parseInt(themInput);
 
-    if (isNaN(usVal) || isNaN(themVal)) {
-      showErr('الرجاء إدخال أرقام صحيحة');
-      return;
-    }
-
+    if (isNaN(usVal) || isNaN(themVal)) return;
     if (usVal === 0 && themVal === 0) return;
-
-    const total = usVal + themVal;
-
-    const validBaseTotals = [
-      16, 26, 36, 46, 52, 62, 66, 72, 76, 82, 86, 92, 96, 102, 106, 
-      112, 116, 122, 126, 136, 142, 152, 162, 172, 212, 252, 262, 302, 352, 452, 552
-    ];
-
-    const isBaseValid = validBaseTotals.includes(total);
-    
-    let hasValidProject = false;
-    if (!isBaseValid) {
-      for (const base of validBaseTotals) {
-        const diff = Math.abs(total - base);
-        if (diff % 10 === 0 && diff >= 40 && diff <= 500) {
-          hasValidProject = true;
-          break;
-        }
-      }
-    }
-
-    if (!isBaseValid && !hasValidProject) {
-      showErr(`خطأ في الحساب! مجموع النقاط (${total}) لا يوافق أي من قوانين البلوت أو المشاريع الصحيحة.`);
-      return;
-    }
 
     const newRound: Round = { us: usVal, them: themVal };
     const updatedRounds = [newRound, ...rounds];
@@ -146,7 +99,6 @@ export default function BalootCalculator() {
     setThemScore(newThemScore);
     setRounds(updatedRounds);
     setWinnerMessage('');
-    setErrText('');
 
     saveToStorage(newUsScore, newThemScore, updatedRounds, '');
   };
@@ -157,7 +109,6 @@ export default function BalootCalculator() {
     setUsInput('');
     setThemInput('');
     setRounds([]);
-    setErrText('');
     setWinnerMessage('');
 
     localStorage.removeItem('baloot_usScore');
@@ -188,12 +139,6 @@ export default function BalootCalculator() {
           <h1 style={{ fontSize: '30px', fontWeight: '800', color: '#C9A45C', letterSpacing: '0.5px' }}>حاسبة البلوت</h1>
           <p style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '400', marginTop: '6px' }}>نظام دقيق ومحترف لإدارة القيود</p>
         </div>
-
-        {errText && (
-          <div style={{ background: 'rgba(220, 38, 38, 0.15)', border: '1px solid #ef4444', color: '#fca5a5', padding: '14px 20px', borderRadius: '10px', fontWeight: 'bold', maxWidth: '500px', margin: '0 auto 20px', fontSize: '14px' }}>
-            ⚠️ {errText}
-          </div>
-        )}
 
         {winnerMessage && (
           <div style={{ background: 'rgba(46, 74, 125, 0.3)', border: '1px solid #2E4A7D', color: '#C9A45C', padding: '16px', borderRadius: '12px', fontWeight: '800', fontSize: '18px', maxWidth: '500px', margin: '0 auto 20px' }}>
