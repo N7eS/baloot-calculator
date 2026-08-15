@@ -37,7 +37,6 @@ export default function BalootCalculator() {
     localStorage.setItem('baloot_winner', winner);
   };
 
-  // تشغيل صوت الخطأ (error.mp3)
   const playErrorSound = () => {
     try {
       const audio = new Audio('/error.mp3');
@@ -47,7 +46,6 @@ export default function BalootCalculator() {
     }
   };
 
-  // تشغيل صوت الفوز (finish.mp3)
   const playFinishSound = () => {
     try {
       const audio = new Audio('/finish.mp3');
@@ -57,7 +55,6 @@ export default function BalootCalculator() {
     }
   };
 
-  // النطق الصوتي يعمل فقط عند الضغط على زر "جم القيد؟"
   const speakResult = () => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
@@ -70,7 +67,7 @@ export default function BalootCalculator() {
 
   const showErr = (msg: string) => {
     setErrText(msg);
-    playErrorSound(); // تشغيل ملف الصوت الخاص بالخطأ فقط
+    playErrorSound();
     setTimeout(() => setErrText(''), 5000);
   };
 
@@ -89,13 +86,26 @@ export default function BalootCalculator() {
 
     const total = usVal + themVal;
 
-    const validBalootTotals = [
+    const validBaseTotals = [
       16, 26, 36, 46, 52, 62, 66, 72, 76, 82, 86, 92, 96, 102, 106, 
       112, 116, 122, 126, 136, 142, 152, 162, 172, 212, 252, 262, 302, 352, 452, 552
     ];
 
-    if (!validBalootTotals.includes(total)) {
-      showErr(`خطأ في الحساب! مجموع النقاط (${total}) لا يوافق أي من قوانين البلوت الصحيحة.`);
+    const isBaseValid = validBaseTotals.includes(total);
+    
+    let hasValidProject = false;
+    if (!isBaseValid) {
+      for (const base of validBaseTotals) {
+        const diff = Math.abs(total - base);
+        if (diff % 10 === 0 && diff >= 40 && diff <= 500) {
+          hasValidProject = true;
+          break;
+        }
+      }
+    }
+
+    if (!isBaseValid && !hasValidProject) {
+      showErr(`خطأ في الحساب! مجموع النقاط (${total}) لا يوافق أي من قوانين البلوت أو المشاريع الصحيحة.`);
       return;
     }
 
@@ -109,7 +119,7 @@ export default function BalootCalculator() {
     if (newUsScore >= 152 || newThemScore >= 152) {
       const teamName = newUsScore > newThemScore ? 'لنا' : 'لهم';
       newWinner = `🎉 مبروك فوز فريق (${teamName}) بالجيّم!`;
-      playFinishSound(); // تشغيل ملف الصوت الخاص بالفوز فقط
+      playFinishSound();
     }
 
     setUsScore(newUsScore);
@@ -191,10 +201,8 @@ export default function BalootCalculator() {
           </div>
         )}
 
-        {/* حاوية مربعات الفريقين مع السجلات تحتها */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginBottom: '25px', maxWidth: '650px', margin: '0 auto 25px', alignItems: 'flex-start' }}>
           
-          {/* فريق لنا */}
           <div style={{ background: '#C9A45C', padding: '25px 20px', borderRadius: '16px', border: '1px solid #b8934b', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#1C1F26', fontSize: '18px', marginBottom: '10px', fontWeight: '800' }}>لنا</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#1C1F26' }}>{usScore}</div>
@@ -217,7 +225,6 @@ export default function BalootCalculator() {
             )}
           </div>
 
-          {/* فريق لهم */}
           <div style={{ background: '#2A2E35', padding: '25px 20px', borderRadius: '16px', border: '1px solid #3A3F48', flex: 1, boxShadow: '0 10px 25px rgba(0,0,0,0.3)' }}>
             <h3 style={{ color: '#2E4A7D', fontSize: '18px', marginBottom: '10px', fontWeight: '700' }}>لهم</h3>
             <div style={{ fontSize: '48px', fontWeight: '900', marginBottom: '20px', color: '#E0E0E0' }}>{themScore}</div>
